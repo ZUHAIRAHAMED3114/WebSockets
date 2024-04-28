@@ -1,0 +1,30 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+
+    <script>
+
+
+        let index = 0;
+        let connection = new signalR.HubConnectionBuilder()
+            .withUrl("/protected", {accessTokenFactory: () => "user_id_in_the_token_" + index++})
+            .build();
+
+        const _connect = () => connection.start()
+            .then(() => setTimeout(() => console.log('finito'), 30000))
+
+        const _getCookie = () => fetch('/get-cookie')
+        const _cookie = () => connection.invoke('CookieProtected').then(r => console.log(r))
+        const _token = () => connection.invoke('TokenProtected').then(r => console.log(r))
+
+        const _testCookie = () => fetch('/cookie').then(r => r.text()).then(t => console.log(t))
+        const _testToken = (token) => (token ? fetch('/token?access_token=' + token) : fetch('/token'))
+            .then(r => r.text()).then(t => console.log(t))
+    </script>
+</body>
+</html>

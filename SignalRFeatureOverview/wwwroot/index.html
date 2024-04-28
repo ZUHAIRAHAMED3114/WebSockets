@@ -1,0 +1,64 @@
+﻿﻿
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+
+    <script>
+        //let connection = new signalR.HubConnectionBuilder()
+        //    .withUrl("/custom")
+        //    .build();
+        function generateUniqueId() {
+            // Generate a random string using Math.random() and convert it to a hexadecimal string
+            // You can replace this with your own logic for generating unique IDs
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                var r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        let connectionId = localStorage.getItem('connectionId');
+        if (!connectionId) {
+            connectionId = generateUniqueId(); // Some function to generate a unique identifier
+            localStorage.setItem('connectionId', connectionId);
+        }
+
+        // Use the retrieved or generated connection ID to establish the SignalR connection
+        let connection = new signalR.HubConnectionBuilder()
+            .withUrl("/custom", { accessTokenFactory: () => connectionId })
+            .build();
+
+        // after selfPing
+        connection.on("ClientHook", data => console.log('ClientHook', data));
+
+        // after triggerFetch
+        connection.on("client_function_name", data => console.log('client_function_name', data));
+
+        connection.start().then(() => {
+            console.log("connected")
+            connection.send('ServerHook', { id: 1, message: "we've connected" })
+        });
+
+        // call signalR hub function from client
+        const pingSelf = () => connection.send('SelfPing')
+
+        // call signalR hub function from client
+        const pingAll = () => connection.send('PingAll')
+
+        // trigger hub from controller
+        const triggerFetch = () => fetch('/send')
+
+        // call signalR hub function from client
+        const withReturn = () => connection.invoke('invocation_with_return')
+            .then(data => console.log('returned', data))
+
+
+
+    </script>
+</body>
+</html>

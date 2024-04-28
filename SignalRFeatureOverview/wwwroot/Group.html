@@ -1,0 +1,45 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+      
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.11/signalr.min.js"></script>
+
+    <script>
+        let connection = new signalR.HubConnectionBuilder()
+        .withUrl("/groups")
+        .build();
+
+     connection.on('group_message', data => console.log('group_message', data))
+
+     connection.start().then(() => console.log("connected"));
+
+     const join = () => connection.send('Join')
+     const leave = () => connection.send('Leave')
+     const message = () => connection.send('Message')
+
+     const joinRole1 = () => connection.send('JoinRole1');
+     const joinRole2 = () => connection.send('JoinRole2');
+     const joinRole3 = () => connection.send('JoinRole3');
+
+        // Example usage for JoinGroup method
+     const joinGroup = (rolename) => connection.send('JoinGroup', rolename);
+
+     const sendMessageToDefaultGroup = () => connection.send('Message');
+        // Call the Message method with a specific group name
+     const sendMessageToGroup = async (groupName, message) => {
+            try {
+                // Call the MessageWithGroupName method on the server-side
+                await connection.send('MessageWithGroupName', groupName, message);
+                console.log(`Message sent to group ${groupName}: ${message}`);
+            } catch (error) {
+                console.error('Error sending message to group:', error);
+            }
+        };
+
+    </script>
+</body>
+</html>
